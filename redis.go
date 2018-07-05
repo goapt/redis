@@ -19,7 +19,7 @@ type Config struct {
 
 func Client(name ... string) *redis.Client {
 	key := "default"
-	if len(name) > 0 {
+	if name != nil {
 		key = name[0]
 	}
 

@@ -49,7 +49,14 @@ func Connect(configs map[string]Config) {
 			continue
 		}
 
-		redisList[name] = newRedis(&conf)
+		client := newRedis(&conf)
+
+		if r, ok := redisList[name]; ok {
+			redisList[name] = client
+			r.Close()
+		} else {
+			redisList[name] = client
+		}
 	}
 }
 

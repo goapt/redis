@@ -53,6 +53,10 @@ func (b *BaseRedis) hMSet(key string, fn func() map[string]interface{}) error {
 	return b.Client().Expire(key, CACHE_DAY_TTL).Err()
 }
 
+func (b *BaseRedis) HGet(key string, field string) (string, error) {
+	return b.Client().HGet(key, field).Result()
+}
+
 func (b *BaseRedis) HSet(key string, field string, value interface{}) error {
 	return b.Client().HSet(key, field, value).Err()
 }

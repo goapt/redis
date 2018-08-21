@@ -126,3 +126,7 @@ func (b *BaseRedis) DecrBy(key string, value int64) (int64, error) {
 func (b *BaseRedis) Expire(key string, expiration time.Duration) (bool, error) {
 	return b.Client().Expire(key, expiration).Result()
 }
+
+func (b *BaseRedis) SAdd(key string, members ...interface{}) (int64, error) {
+	return b.Client().SAdd(key, members...).Result()
+}

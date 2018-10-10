@@ -1,9 +1,10 @@
 package redis
 
 import (
-	"github.com/go-redis/redis"
 	"log"
 	"strings"
+
+	"github.com/go-redis/redis"
 )
 
 var (

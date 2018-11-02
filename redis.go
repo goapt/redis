@@ -83,11 +83,11 @@ func newRedis(conf *Config) *redis.Client {
 	}
 
 	if conf.ReadTimeout > 0 {
-		options.ReadTimeout = time.Duration(conf.ReadTimeout) + time.Second
+		options.ReadTimeout = time.Duration(conf.ReadTimeout) * time.Second
 	}
 
 	if conf.WriteTimeout > 0 {
-		options.WriteTimeout = time.Duration(conf.WriteTimeout) + time.Second
+		options.WriteTimeout = time.Duration(conf.WriteTimeout) * time.Second
 	}
 
 	client := redis.NewClient(options)

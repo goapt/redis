@@ -1,11 +1,10 @@
 package redis
 
 import (
+	"github.com/go-redis/redis"
 	"log"
 	"strings"
 	"time"
-
-	"github.com/go-redis/redis"
 )
 
 var (
@@ -18,9 +17,9 @@ type Config struct {
 	Password     string
 	DB           int
 	MaxRetries   int
-	DialTimeout  time.Duration `json:"dial_timeout" toml:"dial_timeout"`
-	ReadTimeout  time.Duration `json:"read_timeout" toml:"read_timeout"`
-	WriteTimeout time.Duration `json:"write_timeout" toml:"write_timeout"`
+	DialTimeout  int `json:"dial_timeout" toml:"dial_timeout"`
+	ReadTimeout  int `json:"read_timeout" toml:"read_timeout"`
+	WriteTimeout int `json:"write_timeout" toml:"write_timeout"`
 }
 
 func Client(name ... string) *redis.Client {
@@ -80,15 +79,15 @@ func newRedis(conf *Config) *redis.Client {
 	}
 
 	if conf.DialTimeout > 0 {
-		options.DialTimeout = conf.DialTimeout
+		options.DialTimeout = time.Duration(conf.DialTimeout) * time.Second
 	}
 
 	if conf.ReadTimeout > 0 {
-		options.ReadTimeout = conf.ReadTimeout
+		options.ReadTimeout = time.Duration(conf.ReadTimeout) + time.Second
 	}
 
 	if conf.WriteTimeout > 0 {
-		options.WriteTimeout = conf.WriteTimeout
+		options.WriteTimeout = time.Duration(conf.WriteTimeout) + time.Second
 	}
 
 	client := redis.NewClient(options)

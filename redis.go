@@ -18,9 +18,9 @@ type Config struct {
 	Password     string
 	DB           int
 	MaxRetries   int
-	DialTimeout  time.Duration
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	DialTimeout  time.Duration `json:"dial_timeout" toml:"dial_timeout"`
+	ReadTimeout  time.Duration `json:"read_timeout" toml:"read_timeout"`
+	WriteTimeout time.Duration `json:"write_timeout" toml:"write_timeout"`
 }
 
 func Client(name ... string) *redis.Client {

@@ -3,6 +3,7 @@ package redis
 import (
 	"log"
 	"strings"
+	"time"
 
 	"github.com/go-redis/redis"
 )
@@ -13,9 +14,13 @@ var (
 )
 
 type Config struct {
-	Server   string
-	Password string
-	DB       int
+	Server       string
+	Password     string
+	DB           int
+	MaxRetries   int
+	DialTimeout  time.Duration
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
 }
 
 func Client(name ... string) *redis.Client {
@@ -64,10 +69,28 @@ func Connect(configs map[string]Config) {
 // 创建 redis pool
 func newRedis(conf *Config) *redis.Client {
 
-	client := redis.NewClient(&redis.Options{
+	options := &redis.Options{
 		Addr:     conf.Server,
 		Password: conf.Password, // no password set
 		DB:       conf.DB,       // use default DB
-	})
+	}
+
+	if conf.MaxRetries > 0 {
+		options.MaxRetries = conf.MaxRetries
+	}
+
+	if conf.DialTimeout > 0 {
+		options.DialTimeout = conf.DialTimeout
+	}
+
+	if conf.ReadTimeout > 0 {
+		options.ReadTimeout = conf.ReadTimeout
+	}
+
+	if conf.WriteTimeout > 0 {
+		options.WriteTimeout = conf.WriteTimeout
+	}
+
+	client := redis.NewClient(options)
 	return client
 }

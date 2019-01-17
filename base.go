@@ -19,6 +19,14 @@ type BaseRedis struct {
 	Client func() *redis.Client
 }
 
+func NewBaseRedis(name string) *BaseRedis {
+	return &BaseRedis{
+		Client: func() *redis.Client {
+			return Client(name)
+		},
+	}
+}
+
 func (b *BaseRedis) HGetAll(key string, m gosql.IModel) error {
 	info, err := b.Client().HGetAll(key).Result()
 	if err != nil {
@@ -69,8 +77,8 @@ func (b *BaseRedis) HExists(key string, field string) (bool, error) {
 	return b.Client().HExists(key, field).Result()
 }
 
-func (b *BaseRedis) HIncrBy(key string, field string,incr int64) (int64, error) {
-	return b.Client().HIncrBy(key, field,incr).Result()
+func (b *BaseRedis) HIncrBy(key string, field string, incr int64) (int64, error) {
+	return b.Client().HIncrBy(key, field, incr).Result()
 }
 
 func (b *BaseRedis) Exists(key string) bool {

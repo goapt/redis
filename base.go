@@ -146,3 +146,7 @@ func (b *BaseRedis) Expire(key string, expiration time.Duration) (bool, error) {
 func (b *BaseRedis) SAdd(key string, members ...interface{}) (int64, error) {
 	return b.Client().SAdd(key, members...).Result()
 }
+
+func (b *BaseRedis) TTL(key string) time.Duration {
+	return b.Client().TTL(key).Val()
+}

@@ -119,6 +119,10 @@ func (b *BaseRedis) Set(key, val string) error {
 	return b.Client().Set(key, val, CACHE_DAY_TTL).Err()
 }
 
+func (b *BaseRedis) SetEX(key, val string, expiration time.Duration) error {
+	return b.Client().SetXX(key, val, expiration).Err()
+}
+
 func (b *BaseRedis) Get(key string) (string, error) {
 	return b.Client().Get(key).Result()
 }

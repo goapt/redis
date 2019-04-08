@@ -120,7 +120,7 @@ func (b *BaseRedis) Set(key, val string) error {
 }
 
 func (b *BaseRedis) SetEX(key, val string, expiration time.Duration) error {
-	return b.Client().SetXX(key, val, expiration).Err()
+	return b.Client().Set(key, val, expiration).Err()
 }
 
 func (b *BaseRedis) Get(key string) (string, error) {

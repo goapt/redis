@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -72,10 +73,20 @@ func convertAssignBulkString(d reflect.Value, s []byte) (err error) {
 		}
 	case reflect.Struct:
 		if fieldType.ConvertibleTo(_ctime_type) {
-			t, err := time.ParseInLocation("2006-01-02 15:04:05", ss, time.Local)
+			var t time.Time
+			t = time.Time{}
+			err := t.UnmarshalBinary([]byte(ss))
 			if err != nil {
-				return err
+				var layout = "2006-01-02 15:04:05"
+				if strings.Index(ss,"T") != -1 {
+					layout = time.RFC3339
+				}
+				t, err = time.ParseInLocation(layout, ss, time.Local)
+				if err != nil {
+					return err
+				}
 			}
+
 			d.Set(reflect.ValueOf(t).Convert(fieldType))
 		}
 

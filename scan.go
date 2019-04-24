@@ -193,7 +193,7 @@ func ScanStruct(src map[string]string, dest interface{}) error {
 	if d.Kind() != reflect.Struct {
 		return errScanStructValue
 	}
-	dd := reflect.TypeOf(dest).Elem() //通过反射获取type定义
+	dd := reflect.TypeOf(dest).Elem()
 	col := structSpecForType(dd)
 	//fmt.Println(col)
 

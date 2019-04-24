@@ -1,11 +1,13 @@
 package redis
 
 import (
+	"errors"
+	"fmt"
+	"github.com/verystar/golib/convert"
+	"reflect"
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/ilibs/gosql"
-	"github.com/verystar/golib/convert"
 )
 
 const (
@@ -27,7 +29,7 @@ func NewBaseRedis(name string) *BaseRedis {
 	}
 }
 
-func (b *BaseRedis) HGetAll(key string, m gosql.IModel) error {
+func (b *BaseRedis) HGetAll(key string, m interface{}) error {
 	info, err := b.Client().HGetAll(key).Result()
 	if err != nil {
 		return err
@@ -39,22 +41,36 @@ func (b *BaseRedis) HGetAllMap(key string) (map[string]string, error) {
 	return b.Client().HGetAll(key).Result()
 }
 
-func (b *BaseRedis) HMSet(key string, m gosql.IModel) error {
-	var fn = func() map[string]interface{} {
-		return convert.StructToMapInterface(m)
+// HMSet support gosql.Model and map[string]interface{}
+func (b *BaseRedis) HMSet(key string, m interface{}) error {
+	var mm map[string]interface{}
+	var ok bool
+	ref := reflect.TypeOf(m)
+	if ref.Kind() == reflect.Ptr {
+		ref = ref.Elem()
 	}
-	return b.hMSet(key, fn)
+	switch ref.Kind() {
+	case reflect.Struct:
+		mm = convert.StructToMapInterface(m)
+	case reflect.Map:
+		mm, ok = m.(map[string]interface{});
+		if !ok {
+			return errors.New("value must is map[string]interafce{}")
+		}
+	default:
+		return errors.New(fmt.Sprintf("cannot convert from %s",ref))
+	}
+
+	return b.hMSet(key, mm)
 }
 
+// Deprecated
 func (b *BaseRedis) HMSetMap(key string, m map[string]interface{}) error {
-	var fn = func() map[string]interface{} {
-		return m
-	}
-	return b.hMSet(key, fn)
+	return b.hMSet(key, m)
 }
 
-func (b *BaseRedis) hMSet(key string, fn func() map[string]interface{}) error {
-	err := b.Client().HMSet(key, fn()).Err()
+func (b *BaseRedis) hMSet(key string, m map[string]interface{}) error {
+	err := b.Client().HMSet(key, m).Err()
 	if err != nil {
 		return err
 	}

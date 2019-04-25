@@ -3,7 +3,6 @@ package redis
 import (
 	"errors"
 	"fmt"
-	"github.com/verystar/golib/convert"
 	"reflect"
 	"time"
 
@@ -51,9 +50,9 @@ func (b *BaseRedis) HMSet(key string, m interface{}) error {
 	}
 	switch ref.Kind() {
 	case reflect.Struct:
-		mm = convert.StructToMapInterface(m)
+		mm = StructToMapInterface(m)
 	case reflect.Map:
-		mm, ok = m.(map[string]interface{});
+		mm, ok = m.(map[string]interface{})
 		if !ok {
 			return errors.New("value must is map[string]interafce{}")
 		}

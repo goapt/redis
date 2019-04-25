@@ -3,6 +3,7 @@ package redis
 import (
 	"errors"
 	"fmt"
+	"github.com/verystar/golib/reflectx"
 	"reflect"
 	"strconv"
 	"strings"
@@ -13,9 +14,6 @@ import (
 var (
 	ScanTagName = "json"
 )
-
-var _ctime time.Time
-var _ctime_type = reflect.TypeOf(_ctime)
 
 var (
 	errScanStructValue    = errors.New("ScanStruct: value must be non-nil pointer to a struct")
@@ -72,7 +70,8 @@ func convertAssignBulkString(d reflect.Value, s []byte) (err error) {
 			d.SetBytes(s)
 		}
 	case reflect.Struct:
-		if fieldType.ConvertibleTo(_ctime_type) {
+		switch d.Interface().(type) {
+		case time.Time:
 			var t time.Time
 			t = time.Time{}
 			err := t.UnmarshalBinary([]byte(ss))
@@ -88,6 +87,8 @@ func convertAssignBulkString(d reflect.Value, s []byte) (err error) {
 			}
 
 			d.Set(reflect.ValueOf(t).Convert(fieldType))
+		default:
+			err = cannotConvert(d, s)
 		}
 
 	default:
@@ -204,4 +205,25 @@ func ScanStruct(src map[string]string, dest interface{}) error {
 	}
 
 	return nil
+}
+
+
+var mapper = reflectx.NewMapper("db")
+
+func StructToMapInterface(m interface{}) map[string]interface{} {
+	v := reflect.ValueOf(m)
+	fields := mapper.FieldMap(v)
+
+	rs := make(map[string]interface{})
+	for k, v := range fields {
+
+		switch s := v.Interface().(type) {
+		case time.Time :
+			rs[k] = s.Format( "2006-01-02 15:04:05")
+		default:
+			rs[k] = v.Interface()
+		}
+	}
+
+	return rs
 }

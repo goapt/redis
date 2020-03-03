@@ -1,10 +1,11 @@
 package redis
 
 import (
-	"github.com/go-redis/redis"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/go-redis/redis"
 )
 
 var (
@@ -22,7 +23,7 @@ type Config struct {
 	WriteTimeout int `json:"write_timeout" toml:"write_timeout"`
 }
 
-func Client(name ... string) *redis.Client {
+func Client(name ...string) *redis.Client {
 	key := "default"
 	if name != nil {
 		key = name[0]

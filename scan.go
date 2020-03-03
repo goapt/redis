@@ -3,7 +3,6 @@ package redis
 import (
 	"errors"
 	"fmt"
-	"github.com/verystar/golib/reflectx"
 	"reflect"
 	"strconv"
 	"strings"
@@ -77,7 +76,7 @@ func convertAssignBulkString(d reflect.Value, s []byte) (err error) {
 			err := t.UnmarshalBinary([]byte(ss))
 			if err != nil {
 				var layout = "2006-01-02 15:04:05"
-				if strings.Index(ss,"T") != -1 {
+				if strings.Index(ss, "T") != -1 {
 					layout = time.RFC3339
 				}
 				t, err = time.ParseInLocation(layout, ss, time.Local)
@@ -164,7 +163,7 @@ func structSpecForType(t reflect.Type) map[string]string {
 	if found {
 		return col
 	}
-	//fmt.Println("CACHE MISS")
+	// fmt.Println("CACHE MISS")
 
 	col = make(map[string]string)
 	for i := 0; i < t.NumField(); i++ {
@@ -196,7 +195,7 @@ func ScanStruct(src map[string]string, dest interface{}) error {
 	}
 	dd := reflect.TypeOf(dest).Elem()
 	col := structSpecForType(dd)
-	//fmt.Println(col)
+	// fmt.Println(col)
 
 	for k, c := range col {
 		if err := convertAssignValue(d.FieldByName(c), src[k]); err != nil {
@@ -207,21 +206,18 @@ func ScanStruct(src map[string]string, dest interface{}) error {
 	return nil
 }
 
-
-var mapper = reflectx.NewMapper("db")
-
-func StructToMapInterface(m interface{}) map[string]interface{} {
-	v := reflect.ValueOf(m)
-	fields := mapper.FieldMap(v)
-
+func structToMapInterface(m interface{}) map[string]interface{} {
+	v := reflect.Indirect(reflect.ValueOf(m))
+	t := v.Type()
 	rs := make(map[string]interface{})
-	for k, v := range fields {
-
-		switch s := v.Interface().(type) {
-		case time.Time :
-			rs[k] = s.Format( "2006-01-02 15:04:05")
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		n := t.Field(i).Tag.Get("db")
+		switch s := f.Interface().(type) {
+		case time.Time:
+			rs[n] = s.Format("2006-01-02 15:04:05")
 		default:
-			rs[k] = v.Interface()
+			rs[n] = f.Interface()
 		}
 	}
 

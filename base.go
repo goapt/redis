@@ -50,22 +50,17 @@ func (b *BaseRedis) HMSet(key string, m interface{}) error {
 	}
 	switch ref.Kind() {
 	case reflect.Struct:
-		mm = StructToMapInterface(m)
+		mm = structToMapInterface(m)
 	case reflect.Map:
 		mm, ok = m.(map[string]interface{})
 		if !ok {
 			return errors.New("value must is map[string]interafce{}")
 		}
 	default:
-		return errors.New(fmt.Sprintf("cannot convert from %s",ref))
+		return errors.New(fmt.Sprintf("cannot convert from %s", ref))
 	}
 
 	return b.hMSet(key, mm)
-}
-
-// Deprecated
-func (b *BaseRedis) HMSetMap(key string, m map[string]interface{}) error {
-	return b.hMSet(key, m)
 }
 
 func (b *BaseRedis) hMSet(key string, m map[string]interface{}) error {

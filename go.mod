@@ -4,7 +4,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/onsi/gomega v1.4.2 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 

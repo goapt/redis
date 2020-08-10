@@ -1,11 +1,11 @@
 module github.com/goapt/redis
 
+go 1.13
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-redis/redis v6.15.7+incompatible
-	github.com/onsi/gomega v1.4.2 // indirect
-	github.com/stretchr/testify v1.5.1
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	github.com/go-redis/redis/v7 v7.3.0
+	github.com/mitchellh/mapstructure v1.3.0
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.2.2
 )
-
-go 1.13

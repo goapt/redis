@@ -1,12 +1,11 @@
 package redis
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
 
-type tUsers struct {
+type t_users struct {
 	UserId     int       `json:"user_id" db:"user_id"`
 	UserName   string    `json:"user_name" db:"user_name"`
 	Status     int       `json:"status" db:"status"`
@@ -28,14 +27,14 @@ var m = map[string]string{
 
 func BenchmarkScanStruct(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		user := &tUsers{}
-		ScanStruct(m, user)
+		user := &t_users{}
+		scanStruct(m, user)
 	}
 }
 
 func TestScanStruct(t *testing.T) {
-	user := &tUsers{}
-	err := ScanStruct(m, user)
+	user := &t_users{}
+	err := scanStruct(m, user)
 
 	if err != nil {
 		t.Error(err)
@@ -52,12 +51,10 @@ func TestScanStruct(t *testing.T) {
 }
 
 func Test_structToMapInterface(t *testing.T) {
-	user := &tUsers{
+	user := &t_users{
 		CreateTime: time.Date(2019, 11, 02, 15, 04, 05, 0, time.UTC),
 	}
 	m := structToMapInterface(user)
-
-	fmt.Println(user, m)
 	var now2 string
 
 	if m2, has := m["create_time"]; has {

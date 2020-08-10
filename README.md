@@ -10,7 +10,7 @@ base on go-redis library
 
 
 
-## 使用
+## Usage
 
 ```shell script
 go get github.com/goapt/redis

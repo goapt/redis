@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ScanTagName = "db"
-	loc, _      = time.LoadLocation("Asia/Shanghai")
+	ScanTagName        = "db"
+	DefaultLocation, _ = time.LoadLocation("Asia/Shanghai")
 )
 
 var DecodeHook = func(from reflect.Type, to reflect.Type, v interface{}) (interface{}, error) {
@@ -24,7 +24,7 @@ var DecodeHook = func(from reflect.Type, to reflect.Type, v interface{}) (interf
 				if strings.Index(ss, "T") != -1 {
 					layout = time.RFC3339
 				}
-				t, err = time.ParseInLocation(layout, ss, loc)
+				t, err = time.ParseInLocation(layout, ss, DefaultLocation)
 				if err != nil {
 					return nil, err
 				}

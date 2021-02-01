@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testServer = "10.64.144.155:6379"
+var testServer = "127.0.0.1:6379"
 
 func init() {
 	if os.Getenv("DRONE") == "true" {

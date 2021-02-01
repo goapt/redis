@@ -12,7 +12,11 @@ func TestMain(m *testing.M) {
 	configs := make(map[string]Config)
 
 	configs["default"] = Config{
-		Server: testServer,
+		Server:       testServer,
+		MaxRetries:   3,
+		DialTimeout:  2,
+		ReadTimeout:  3,
+		WriteTimeout: 4,
 	}
 
 	Connect(configs)
@@ -139,13 +143,39 @@ func TestRedis_HMSet(t *testing.T) {
 		t.Errorf("hmset error:%s", err)
 	}
 
-	v, err := client.HGet("test", "a")
-	if err != nil {
-		t.Errorf("hget error:%s", err)
+	{
+		err := client.HSet("test", "a", "3")
+		if err != nil {
+			t.Errorf("hget error:%s", err)
+		}
 	}
 
-	if v != "1" {
-		t.Errorf("hmset map[string]string want get:%s but get:%s", "1", v)
+	{
+		v, err := client.HGet("test", "a")
+		if err != nil {
+			t.Errorf("hget error:%s", err)
+		}
+
+		if v != "3" {
+			t.Errorf("hmset map[string]string want get:%s but get:%s", "1", v)
+		}
+	}
+
+	{
+		err := client.HDel("test", "a")
+		assert.NoError(t, err)
+	}
+
+	{
+		has, err := client.HExists("test", "a")
+		assert.NoError(t, err)
+		assert.False(t, has)
+	}
+
+	{
+		v, err := client.HIncrBy("test", "b", 1)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(3), v)
 	}
 }
 
@@ -154,4 +184,124 @@ func TestIsNil(t *testing.T) {
 
 	_, err := client.Get("nil_test")
 	assert.True(t, IsNil(err))
+}
+
+func TestRedis_Exists(t *testing.T) {
+	client := NewRedis(Client("default"))
+
+	has := client.Exists("no_test")
+	assert.False(t, has)
+}
+
+func TestRedis_List(t *testing.T) {
+	client := NewRedis(Client("default"))
+
+	err := client.Del("test_list")
+	assert.NoError(t, err)
+
+	has, err := client.LPush("test_list", 1, 2, 3)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(3), has)
+
+	{
+		v, err := client.LPop("test_list")
+		assert.NoError(t, err)
+		assert.Equal(t, "3", v)
+	}
+
+	{
+		v, err := client.RPush("test_list", 4)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(3), v)
+	}
+
+	{
+		v, err := client.RPop("test_list")
+		assert.NoError(t, err)
+		assert.Equal(t, "4", v)
+	}
+
+}
+
+func TestRedis_Set(t *testing.T) {
+	client := NewRedis(Client("default"))
+
+	err := client.Del("test_set")
+	assert.NoError(t, err)
+
+	err = client.Set("test_set", "10")
+	assert.NoError(t, err)
+	{
+		v, err := client.Get("test_set")
+		assert.NoError(t, err)
+		assert.Equal(t, v, "10")
+	}
+
+	{
+		v, err := client.Incr("test_set")
+		assert.NoError(t, err)
+		assert.Equal(t, int64(11), v)
+	}
+
+	{
+		v, err := client.Decr("test_set")
+		assert.NoError(t, err)
+		assert.Equal(t, int64(10), v)
+	}
+
+	{
+		v, err := client.IncrBy("test_set", 2)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(12), v)
+	}
+
+	{
+		v, err := client.DecrBy("test_set", 3)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(9), v)
+	}
+
+	{
+		v, err := client.Expire("test_set", 10*time.Second)
+		assert.NoError(t, err)
+		assert.True(t, v)
+	}
+
+	{
+		v := client.TTL("test_set")
+		assert.NoError(t, err)
+		assert.True(t, v.Seconds() > 8)
+	}
+
+}
+
+func TestRedis_SAdd(t *testing.T) {
+	client := NewRedis(Client("default"))
+
+	err := client.Del("test_sadd")
+	assert.NoError(t, err)
+
+	{
+		v, err := client.SAdd("test_sadd", 1, 2, 3)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(3), v)
+	}
+}
+
+func TestRedis_SetEX(t *testing.T) {
+	client := NewRedisWithName("default")
+
+	err := client.Del("test_set_ex")
+	assert.NoError(t, err)
+
+	{
+		err := client.SetEX("test_set_ex", "1", 10*time.Second)
+		assert.NoError(t, err)
+	}
+
+	{
+		v := client.TTL("test_set_ex")
+		assert.NoError(t, err)
+		assert.True(t, v.Seconds() > 8)
+	}
 }

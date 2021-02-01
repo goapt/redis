@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	CacheWeekTTL = 604800 * time.Second // 7day
-	CacheDayTTL  = 86400 * time.Second  // 1day
-	CacheHourTTL = 3600 * time.Second   // 1hour
-	CacheMinTTL  = 60 * time.Second     // 1minutes
+	CACHE_WEEK_TTL = 604800 * time.Second // 7天
+	CACHE_DAY_TTL  = 86400 * time.Second  // 1天
+	CACHE_HOUR_TTL = 3600 * time.Second   // 1小时
+	CACHE_MIN_TTL  = 60 * time.Second     // 1分钟
 )
 
 var ErrNoData = errors.New("data is empty")
@@ -94,7 +94,7 @@ func (b *Redis) hMSet(key string, m map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	return b.client.Expire(key, CacheDayTTL).Err()
+	return b.client.Expire(key, CACHE_DAY_TTL).Err()
 }
 
 func (b *Redis) HGet(key string, field string) (string, error) {
@@ -149,7 +149,7 @@ func (b *Redis) Del(key string) error {
 
 // Set Our specification is that all keys must have an expiration time, so the Set key will expire in one day by default
 func (b *Redis) Set(key, val string) error {
-	return b.client.Set(key, val, CacheDayTTL).Err()
+	return b.client.Set(key, val, CACHE_DAY_TTL).Err()
 }
 
 func (b *Redis) SetEX(key, val string, expiration time.Duration) error {

@@ -1,6 +1,8 @@
 package redis
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"strings"
@@ -18,7 +20,7 @@ type Config struct {
 	Server       string
 	Password     string
 	DB           int
-	MaxRetries   int `json:"max_retries" toml:"max_retries"`
+	MaxRetries   int
 	DialTimeout  int `json:"dial_timeout" toml:"dial_timeout"`
 	ReadTimeout  int `json:"read_timeout" toml:"read_timeout"`
 	WriteTimeout int `json:"write_timeout" toml:"write_timeout"`
@@ -28,6 +30,9 @@ type Config struct {
 	SentinelAddrs    string `json:"sentinel_addrs" toml:"sentinel_addrs"`
 	SentinelUsername string `json:"sentinel_username" toml:"sentinel_username"`
 	SentinelPassword string `json:"sentinel_password" toml:"sentinel_password"`
+	CaCert           string `json:"ca_cert" toml:"ca_cert"`
+	CertFile         string `json:"cert_file" toml:"cert_file"`
+	CertKey          string `json:"cert_key" toml:"cert_key"`
 }
 
 func Client(name ...string) *redis.Client {
@@ -68,7 +73,7 @@ func OpenSentinel(options func(options *redis.FailoverOptions)) *redis.Client {
 func Connect(configs map[string]Config) {
 	defer func() {
 		if len(errs) > 0 {
-			log.Fatal("[redis] " + strings.Join(errs, "\n"))
+			panic("[redis] " + strings.Join(errs, "\n"))
 		}
 	}()
 
@@ -94,7 +99,7 @@ func Connect(configs map[string]Config) {
 	}
 }
 
-// newRedis new redis for config
+// 创建 redis for config
 func newRedis(conf *Config) *redis.Client {
 
 	if conf.MasterName != "" {
@@ -121,6 +126,28 @@ func newRedis(conf *Config) *redis.Client {
 			if conf.WriteTimeout > 0 {
 				options.WriteTimeout = time.Duration(conf.WriteTimeout) * time.Second
 			}
+
+			// 开启TLS连接模式
+			if len(conf.CertKey) > 0 && len(conf.CertFile) > 0 && len(conf.CaCert) > 0 {
+				cert, err := tls.X509KeyPair([]byte(conf.CertFile), []byte(conf.CertKey))
+				if err != nil {
+					panic(fmt.Sprintf("Unable to load key pair: %s", err))
+				}
+
+				pool := x509.NewCertPool()
+				ok := pool.AppendCertsFromPEM([]byte(conf.CaCert))
+				if !ok {
+					panic("failed to parse root certificate")
+				}
+
+				options.TLSConfig = &tls.Config{
+					ClientAuth:   tls.RequireAndVerifyClientCert,
+					Certificates: []tls.Certificate{cert},
+					MinVersion:   tls.VersionTLS12,
+					RootCAs:      pool,
+				}
+			}
+
 		})
 	}
 

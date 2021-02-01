@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testServer = "127.0.0.1:6379"
+var testServer = "10.64.144.155:6379"
 
 func init() {
 	if os.Getenv("DRONE") == "true" {
@@ -47,4 +47,20 @@ func TestConnect(t *testing.T) {
 	Connect(configs)
 	client := Client()
 	assert.NotEqual(t, client, nil, "Redis connect error")
+}
+
+func TestConnectError(t *testing.T) {
+
+	assert.Panics(t, func() {
+		configs := make(map[string]Config)
+
+		configs["default"] = Config{
+			Server: "111.111.111.111",
+		}
+
+		Connect(configs)
+		client := Client()
+		assert.NotEqual(t, client, nil, "Redis connect error")
+	})
+
 }

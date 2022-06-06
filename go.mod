@@ -6,5 +6,5 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-redis/redis/v7 v7.4.1
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 )
